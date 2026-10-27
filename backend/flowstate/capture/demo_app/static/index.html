@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Northwind AP — controlled demo</title>
+    <link rel="stylesheet" href="/demo-app/styles.css" />
+  </head>
+  <body>
+    <header class="demo-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">NW</span>
+        <div>
+          <strong>Northwind Accounts Payable</strong>
+          <small>Controlled invoice-processing demo</small>
+        </div>
+      </div>
+      <span class="demo-badge">No real payments</span>
+    </header>
+
+    <div id="recording-banner" class="recording-banner" hidden>
+      <span class="recording-dot" aria-hidden="true"></span>
+      Recording interactions for workflow learning
+    </div>
+
+    <main id="app" data-page="queue">
+      <section id="queue-view" aria-labelledby="queue-heading">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Invoice queue</p>
+            <h1 id="queue-heading">Find an invoice to review</h1>
+            <p class="lede">
+              Enter a supplier and invoice identifier. The demo returns deterministic
+              fixture data so a recorded workflow can be replayed with different inputs.
+            </p>
+          </div>
+          <span class="queue-count" data-testid="queue-count">3 invoices waiting</span>
+        </div>
+
+        <form id="lookup-form" class="panel" novalidate>
+          <div class="field-grid">
+            <div class="field">
+              <label for="supplier-id">Supplier ID</label>
+              <input
+                id="supplier-id"
+                name="supplier_id"
+                data-param="supplier_id"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="SUP-77"
+                value=""
+              />
+              <small>Try SUP-77 or SUP-88.</small>
+            </div>
+            <div class="field">
+              <label for="invoice-id">Invoice ID</label>
+              <input
+                id="invoice-id"
+                name="invoice_id"
+                data-param="invoice_id"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="INV-1001"
+                value=""
+              />
+              <small>Try INV-1001, INV-1002 or INV-1003.</small>
+            </div>
+          </div>
+          <div class="actions">
+            <button id="load-invoice" data-testid="load-invoice" type="submit" class="primary">
+              Load invoice
+            </button>
+            <span id="lookup-feedback" role="status" class="feedback"></span>
+          </div>
+        </form>
+
+        <div class="hint-grid">
+          <article class="hint">
+            <strong>INV-1001</strong>
+            <span>SUP-77 · totals match the purchase order</span>
+          </article>
+          <article class="hint">
+            <strong>INV-1002</strong>
+            <span>SUP-88 · amount differs from the purchase order</span>
+          </article>
+          <article class="hint">
+            <strong>INV-1003</strong>
+            <span>SUP-77 · approved invoice, totals match</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="invoice-view" aria-labelledby="invoice-heading" hidden>
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Invoice detail</p>
+            <h1 id="invoice-heading">Invoice review</h1>
+          </div>
+          <button id="back-to-queue" data-testid="back-to-queue" type="button" class="ghost">
+            Back to queue
+          </button>
+        </div>
+
+        <article id="invoice-summary" class="panel summary" data-testid="invoice-summary">
+          <div class="summary-head">
+            <div>
+              <span class="label">Invoice</span>
+              <strong id="summary-invoice" data-field="invoice-id">—</strong>
+            </div>
+            <div>
+              <span class="label">Supplier</span>
+              <strong id="summary-supplier" data-field="supplier-id">—</strong>
+            </div>
+            <div>
+              <span class="label">Status</span>
+              <strong id="summary-status" data-field="status">—</strong>
+            </div>
+          </div>
+
+          <table class="lines">
+            <caption>Invoice totals</caption>
+            <tbody>
+              <tr>
+                <th scope="row">Invoice amount</th>
+                <td id="summary-amount" data-field="amount">—</td>
+              </tr>
+              <tr>
+                <th scope="row">Purchase order amount</th>
+                <td id="summary-po" data-field="po-amount">—</td>
+              </tr>
+              <tr>
+                <th scope="row">Currency</th>
+                <td id="summary-currency">USD</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="actions">
+            <button id="validate-invoice" data-testid="validate-invoice" type="button" class="primary">
+              Validate invoice
+            </button>
+            <button
+              id="prepare-approval"
+              data-testid="prepare-approval"
+              type="button"
+              class="secondary"
+              disabled
+              title="Demo only. Nothing is submitted."
+            >
+              Prepare approval (demo only)
+            </button>
+          </div>
+          <p class="safety-note">
+            This page never submits a payment or a real approval. “Prepare approval”
+            only opens a local confirmation panel.
+          </p>
+        </article>
+
+        <div id="validation-result" class="panel result" role="status" data-state="" data-testid="validation-result">
+          <strong id="validation-title">Not validated yet</strong>
+          <p id="validation-detail">Run validation to compare the invoice with its purchase order.</p>
+        </div>
+
+        <div id="approval-panel" class="panel approval" hidden>
+          <strong>Sandbox approval prepared</strong>
+          <p>No approval was submitted. This is a learning checkpoint only.</p>
+        </div>
+      </section>
+
+      <section id="missing-view" aria-labelledby="missing-heading" hidden>
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">Not found</p>
+            <h1 id="missing-heading">Invoice not found</h1>
+            <p class="lede" id="missing-detail">
+              Check the supplier and invoice identifiers and try again.
+            </p>
+          </div>
+        </div>
+        <button id="missing-back" data-testid="missing-back" type="button" class="primary">
+          Back to queue
+        </button>
+      </section>
+    </main>
+
+    <footer class="demo-footer">
+      <span>FLOWSTATE controlled demo · deterministic fixtures</span>
+      <span id="page-marker" class="mono">queue</span>
+    </footer>
+
+    <script src="/demo-app/app.js"></script>
+  </body>
+</html>

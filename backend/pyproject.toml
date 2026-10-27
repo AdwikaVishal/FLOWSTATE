@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flowstate"
+version = "0.1.0"
+description = "FLOWSTATE AI - workflow reliability platform"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+  "fastapi>=0.115",
+  "uvicorn[standard]>=0.32",
+  "pydantic>=2.9",
+  "pydantic-settings>=2.6",
+  "sqlalchemy>=2.0",
+]
+
+[project.optional-dependencies]
+browser = ["playwright>=1.48"]
+alan = [
+  "httpx>=0.28",
+  "mcp>=2.3",
+]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=5.0",
+  "httpx>=0.28",
+  "hypothesis>=6.112",
+  "ruff>=0.8",
+  "mypy>=1.13",
+  "playwright>=1.48",
+  "mcp>=2.3",
+]
+
+[project.scripts]
+flowstate-alan = "flowstate.alan.cli:main"
+flowstate-alan-mcp = "flowstate.alan.mcp_server:main"
+
+[tool.setuptools.package-data]
+"flowstate.capture.demo_app" = ["static/*"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["flowstate*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-m 'not browser and not slow' --strict-markers"
+markers = [
+  "unit: pure domain tests",
+  "integration: ASGI + SQLite tests",
+  "browser: requires a real Chromium",
+  "slow: longer than one second",
+  "acceptance: full journey",
+]
+filterwarnings = ["error::DeprecationWarning:flowstate.*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["flowstate", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RUF"]
+ignore = ["B008"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+files = ["flowstate"]
